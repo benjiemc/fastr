@@ -1,0 +1,11 @@
+# Python Files
+**/*.egg-info/*
+**/*.pyc
+**/.ipynb_checkpoints/*
+**/.pytest_cache/*
+**/*.t.err
+**/.coverage
+.venv/*
+
+# Developement Environment Files
+.vscode/*

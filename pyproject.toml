@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fastr"
+version = "0.0.0"
+authors = [
+    { name="Benjamin McMaster", email="benjamin.mcmaster@rdm.ox.ac.uk"}
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+develop = [
+    "ruff",
+]
+
+[project.scripts]
+fastr = "fastr.cli:main"
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["ALL"]
+extend-select = ["E501"]
+ignore = ["COM812",     # Allow missing trailing comma: not recommended to be used with the formatter
+          "CPY001",     # Do not require copyright notice in files
+          "D107",       # do not require __init__ methods to have a docstring
+          "D203",       # one-blank-line-before-class: ignoring because it clashes with D211
+          "D213",       # multi-line-summary-second-line: ignoring because it clashes with D212
+          "FIX",        # allow TODOs, FIXMEs, etc
+          "ISC001",     # Allow single line str concatenation: not recommended to be used with the formatter
+          "PERF203",    # Allow try-except blocks in loops
+          "PLR0913",    # no maximum number of arguments for a function
+          "PT009",      # allow unit test style asserts
+          "PT027",      # allow unit test style raises assertions
+          "PTH",        # ignore recommendations for pathlib
+          "RET504",     # Allow extra assignment to variable to improve readability
+          "TD",         # allow TODOs, FIXMEs, etc
+          "UP015"]      # allow explicit file modes
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "single"
+
+[tool.ruff.format]
+quote-style = "preserve"
+docstring-code-format = true
