@@ -21,6 +21,7 @@ fastr = "fastr.cli:main"
 
 [tool.ruff]
 line-length = 120
+exclude = ["third_party"]
 
 [tool.ruff.lint]
 select = ["ALL"]
