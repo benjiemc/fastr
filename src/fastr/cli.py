@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 from fastr._log import add_logging_arguments, setup_logger
+from fastr.af3_predictions import run_alphafold3_predictions
 from fastr.msas_and_templates import create_msas_and_templates
 
 parser = argparse.ArgumentParser()
@@ -32,6 +33,14 @@ output_group.add_argument(
 )
 
 parser.add_argument('--num-threads', default=32, type=int, help='number of threads to use to create MSAs')
+parser.add_argument(
+    '--temp-dir', default=None, type=str, help='path to temporary directory to store between run cache (Default: None)'
+)
+
+prediction_parameters = parser.add_argument_group('Prediction parameters')
+prediction_parameters.add_argument('--name', default='prediction', help='name to give the output prediction')
+prediction_parameters.add_argument('--num-recycles', type=int, default=10, help='number of recycles to run')
+prediction_parameters.add_argument('--seeds', nargs='+', default=[1], help='random seeds to use for predictions')
 
 add_logging_arguments(parser)
 
@@ -79,13 +88,20 @@ def main() -> None:
 
     cached_names = get_cached_names(unpaired_msas_dir, paired_msas_dir, templates_dir)
 
-    for chain_type, sequence in ('TCRa', args.tcra), ('TCRb', args.tcrb), ('MHCa', args.mhca), ('MHCb', args.mhcb):
-        name = create_name(sequence)
+    names = {}
+    sequences = {}
+    unpaired_msa_paths = {}
+    paired_msa_paths = {}
+    template_paths = {}
 
-        if name not in cached_names:
+    for chain_type, sequence in ('TCRa', args.tcra), ('TCRb', args.tcrb), ('MHCa', args.mhca), ('MHCb', args.mhcb):
+        names[chain_type] = create_name(sequence)
+        sequences[chain_type] = sequence
+
+        if names[chain_type] not in cached_names:
             logger.info('Creating MSAs for %s', chain_type)
             create_msas_and_templates(
-                name,
+                names[chain_type],
                 sequence,
                 base_dir=base_dir,
                 alphafold_data_dir=alphafold_data_dir,
@@ -98,6 +114,26 @@ def main() -> None:
                 output_dir=cache_dir,
                 num_threads=args.num_threads,
             )
+
+        unpaired_msa_paths[chain_type] = unpaired_msas_dir / (names[chain_type] + '.a3m')
+        paired_msa_paths[chain_type] = paired_msas_dir / (names[chain_type] + '.a3m')
+        template_paths[chain_type] = templates_dir / names[chain_type]
+
+    sequences['peptide'] = args.peptide
+
+    logger.info('Running structure prediction for %s', args.name)
+    run_alphafold3_predictions(
+        args.name,
+        Path(args.output),
+        sequences,
+        num_recycles=args.num_recycles,
+        seeds=args.seeds,
+        base_dir=base_dir,
+        unpaired_msa_paths=unpaired_msa_paths,
+        paired_msa_paths=paired_msa_paths,
+        template_paths=template_paths,
+        temp_dir=Path(args.temp_dir) if args.temp_dir is not None else None,
+    )
 
 
 if __name__ == '__main__':

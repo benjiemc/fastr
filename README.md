@@ -6,6 +6,7 @@ Several environment variables need to be set to run the application. These are:
 
 * `FASTR_BASE_DIR`: path to the FASTR base data directory (eg: /data/fastr-data-dir)
 * `TCRMODEL2_ALPHAFOLD_DATA_DIR`: path to the TCRModel2 data directory (eg: /data/fastr-data-dir/tcrmodel2-alphafold-databases/)
+* `ALPHAFOLD3_WEIGHTS_DIR`: path to the directory containg AlphaFold 3 weights (eg: /path/to/directory/with/af3/weights)
 
 ## Example
 
